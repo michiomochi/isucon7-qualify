@@ -166,24 +166,20 @@ class App < Sinatra::Base
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
-    statement = db.prepare('SELECT * FROM haveread WHERE user_id = ?')
-    havereads = statement.execute(user_id).to_a
+    # statement = db.prepare('SELECT * FROM haveread WHERE user_id = ?')
+    # havereads = statement.execute(user_id).to_a
+    # statement.close
+
+    statement = db.prepare('SELECT channel_id, COUNT(*) as cnt FROM message WHERE user_id = ? group by channel_id')
+    messages = statement.execute(user_id).to_a
     statement.close
 
     res = []
     channel_ids.each do |channel_id|
-      row = havereads.select { |haveread| haveread['channel_id'] == channel_id }.first
+      # row = havereads.select { |haveread| haveread['channel_id'] == channel_id }.first
       r = {}
       r['channel_id'] = channel_id
-      r['unread'] =
-        if row.nil?
-          statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
-          statement.execute(channel_id).first['cnt']
-        else
-          statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id')
-          statement.execute(channel_id, row['message_id']).first['cnt']
-        end
-      statement.close
+      r['unread'] = messages.select { |message| message['channel_id'] }.first['cnt']
       res << r
     end
 
