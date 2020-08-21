@@ -179,7 +179,8 @@ class App < Sinatra::Base
       # row = havereads.select { |haveread| haveread['channel_id'] == channel_id }.first
       r = {}
       r['channel_id'] = channel_id
-      r['unread'] = messages.select { |message| message['channel_id'] }.first['cnt']
+      cnt = messages.select { |message| message['channel_id'] }.first
+      r['unread'] = cnt ? cnt : 0
       res << r
     end
 
