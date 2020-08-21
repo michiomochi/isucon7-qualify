@@ -163,8 +163,6 @@ class App < Sinatra::Base
       return 403
     end
 
-    sleep 1.0
-
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
@@ -174,7 +172,7 @@ class App < Sinatra::Base
 
     res = []
     channel_ids.each do |channel_id|
-      row = havereads.select { |haveread| haveread['channel_id'] == channel_id }
+      row = havereads.select { |haveread| haveread['channel_id'] == channel_id }.first
       r = {}
       r['channel_id'] = channel_id
       r['unread'] =
