@@ -282,6 +282,7 @@ class App < Sinatra::Base
     avatar_data = nil
 
     file = params[:avatar_icon]
+    ext = nil
     unless file.nil?
       filename = file[:filename]
       if !filename.nil? && !filename.empty?
