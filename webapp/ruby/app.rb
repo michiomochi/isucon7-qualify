@@ -183,7 +183,7 @@ class App < Sinatra::Base
       r['channel_id'] = channel_id
 
       unread = messages.select { |message| message['channel_id'] }.first
-      r['unread'] = unread.empty? ? 0 : unread['cnt']
+      r['unread'] = unread.nil? ? 0 : unread['cnt']
 
       # if row.nil?
       #   statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
