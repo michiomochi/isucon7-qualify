@@ -241,7 +241,7 @@ class App < Sinatra::Base
     @self_profile = user['id'] == @user['id']
     erb :profile
   end
-  
+
   get '/add_channel' do
     if user.nil?
       return redirect '/login', 303
@@ -302,9 +302,10 @@ class App < Sinatra::Base
       end
     end
 
-    if !avatar_name.nil? && !avatar_data.nil?
-      statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
-      statement.execute(avatar_name, avatar_data)
+    if !avatar_name.nil? && !avatar_data.nil? && !ext.nil?
+      statement = db.prepare('INSERT INTO image (name, data, mime, ext) VALUES (?, ?, ?, ?)')
+      mime = ext2mime(ext)
+      statement.execute(avatar_name, avatar_data, mime, ext)
       statement.close
       statement = db.prepare('UPDATE user SET avatar_icon = ? WHERE id = ?')
       statement.execute(avatar_name, user['id'])
@@ -325,10 +326,8 @@ class App < Sinatra::Base
     statement = db.prepare('SELECT * FROM image WHERE name = ?')
     row = statement.execute(file_name).first
     statement.close
-    ext = file_name.include?('.') ? File.extname(file_name) : ''
-    mime = ext2mime(ext)
-    if !row.nil? && !mime.empty?
-      content_type mime
+    if !row.nil? && !row['mime'].empty?
+      content_type row['mime']
       return row['data']
     end
     404
