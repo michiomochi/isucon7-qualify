@@ -45,12 +45,10 @@ class App < Sinatra::Base
 
     statement = db.prepare('SELECT * FROM image')
     images = statement.execute
-    statement.close
     images.each do |image|
       ext = image['name'].include?('.') ? File.extname(image['name']) : ''
       statement = db.prepare('UPDATE image SET ext = ?, mime = ? WHERE id = ?')
       statement.execute(ext, ext2mime(ext), image['id'])
-      statement.close
     end
 
     204
