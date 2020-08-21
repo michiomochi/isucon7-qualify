@@ -37,7 +37,6 @@ class App < Sinatra::Base
   end
 
   get '/initialize' do
-    logger.warn("test")
     db.query("DELETE FROM user WHERE id > 1000")
     db.query("DELETE FROM image WHERE id > 1001")
     db.query("DELETE FROM channel WHERE id > 10")
@@ -169,20 +168,23 @@ class App < Sinatra::Base
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
+    statement = db.prepare('SELECT * FROM haveread WHERE user_id = ?')
+    havereads = statement.execute(user_id).to_a
+    statement.close
+
     res = []
     channel_ids.each do |channel_id|
-      statement = db.prepare('SELECT * FROM haveread WHERE user_id = ? AND channel_id = ?')
-      row = statement.execute(user_id, channel_id).first
-      statement.close
+      row = havereads.select { |haveread| haveread['channel_id'] == channel_id }
       r = {}
       r['channel_id'] = channel_id
-      r['unread'] = if row.nil?
-        statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
-        statement.execute(channel_id).first['cnt']
-      else
-        statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id')
-        statement.execute(channel_id, row['message_id']).first['cnt']
-      end
+      r['unread'] =
+        if row.nil?
+          statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
+          statement.execute(channel_id).first['cnt']
+        else
+          statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id')
+          statement.execute(channel_id, row['message_id']).first['cnt']
+        end
       statement.close
       res << r
     end
