@@ -193,7 +193,7 @@ class App < Sinatra::Base
       #   statement.execute(channel_id, row['message_id']).first['cnt']
       # end
 
-      statement.close
+      # statement.close
       res << r
     end
 
