@@ -42,6 +42,17 @@ class App < Sinatra::Base
     db.query("DELETE FROM channel WHERE id > 10")
     db.query("DELETE FROM message WHERE id > 10000")
     db.query("DELETE FROM haveread")
+
+    statement = db.prepare('SELECT * FROM image')
+    images = statement.execute
+    statement.close
+    images.each do |image|
+      ext = image['name'].include?('.') ? File.extname(image['name']) : ''
+      statement = db.prepare('UPDATE image SET ext = ?, mime = ? WHERE id = ?')
+      statement.execute(ext, ext2mime(ext), image['id'])
+      statement.close
+    end
+
     204
   end
 
