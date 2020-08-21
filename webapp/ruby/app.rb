@@ -4,7 +4,7 @@ require 'sinatra/base'
 require 'logger'
 
 class App < Sinatra::Base
-  logger = Logger.new("sinatra.log")
+  logger = Logger.new(STDOUT)
 
   configure do
     set :session_secret, 'tonymoris'
