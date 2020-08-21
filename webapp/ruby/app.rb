@@ -1,8 +1,11 @@
 require 'digest/sha1'
 require 'mysql2'
 require 'sinatra/base'
+require 'logger'
 
 class App < Sinatra::Base
+  logger = Logger.new(STDOUT)
+
   configure do
     set :session_secret, 'tonymoris'
     set :public_folder, File.expand_path('../../public', __FILE__)
@@ -306,8 +309,8 @@ class App < Sinatra::Base
     if !avatar_name.nil? && !avatar_data.nil? && !ext.nil?
       statement = db.prepare('INSERT INTO image (name, data, mime, ext) VALUES (?, ?, ?, ?)')
       mime = ext2mime(ext)
-      puts ext
-      puts mime
+      logger.warn ext
+      logger.warn mime
       statement.execute(avatar_name, avatar_data, mime, ext)
       statement.close
       statement = db.prepare('UPDATE user SET avatar_icon = ? WHERE id = ?')
